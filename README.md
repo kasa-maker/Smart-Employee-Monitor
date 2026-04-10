@@ -1,40 +1,58 @@
-# 👁️ Employee Face Recognition & Mobile Detection System
+Ab README update karte hain. README.md ka poora content replace karo:
+markdown# 🧠 Smart Employee Monitor
 
-A complete employee monitoring system with face recognition, mobile usage tracking, and attendance management.
+A complete real-time employee monitoring system with face recognition, mobile usage tracking, and attendance management.
 
 ---
 
 ## 📁 Project Structure
-VIDEO_API/
-├── video_api/              # Face Recognition & Attendance
-│   ├── main.py             # FastAPI backend
-│   ├── recognize.py        # Live face recognition
-│   ├── extract_faces.py    # Face extraction from DB
-│   ├── streamlit_app.py    # Video upload dashboard
-│   ├── database.py         # DB connection
-│   ├── models.py           # DB models
-│   └── camera.html         # Camera UI
+smart-employee-monitor/
+├── video_api/                  # Face Recognition & Attendance
+│   ├── main.py                 # FastAPI backend
+│   ├── recognize.py            # Live face recognition
+│   ├── extract_faces.py        # Face extraction from DB
+│   ├── streamlit_app.py        # Video upload dashboard
+│   ├── database.py             # DB connection
+│   ├── models.py               # DB models
+│   └── camera.html             # Camera UI
 │
-└── mobile_detection/       # Mobile Usage Tracking
-├── mobile_detection.py # Live mobile detector
-├── db_logger.py        # Database logging
-└── dashboard.py        # Streamlit dashboard
+└── mobile_detection/           # Mobile Usage & Attendance
+├── mobile_detection.py     # Live mobile + face detector
+├── db_logger.py            # Mobile usage logging
+├── attendance_logger.py    # Check-in/out + seat absence
+└── dashboard.py            # Streamlit dashboard
 
 ---
 
 ## ✅ Features
 
-### 👤 Face Recognition System
+### 👤 Face Recognition
 - Upload employee video via browser
 - Automatic face extraction from video
 - Live camera face recognition
 - Employee data stored in PostgreSQL
 
-### 📱 Mobile Detection System
+### 📱 Mobile Detection
 - Mobile phone detection using YOLOv8
 - Hand tracking using MediaPipe
 - Timer to track mobile usage duration
-- Real-time dashboard with usage reports
+- Detects only when mobile is actively being used
+
+### ✅ Attendance Management
+- Auto check-in when employee is detected
+- Auto check-out when system is closed
+- Tracks total hours worked
+
+### 🪑 Seat Monitoring
+- Detects when employee leaves seat
+- Logs absence if away for 15+ minutes
+- Records away time and duration
+
+### 📊 Real-time Dashboard
+- Attendance report
+- Mobile usage report
+- Seat absence report
+- CSV download for all reports
 
 ---
 
@@ -57,8 +75,8 @@ VIDEO_API/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/kasa-maker/Employee-Face-Recognition-Mobile-Detection.git
-cd Employee-Face-Recognition-Mobile-Detection
+git clone https://github.com/kasa-maker/smart-employee-monitor.git
+cd smart-employee-monitor
 ```
 
 ### 2. Environment Variables
@@ -92,19 +110,19 @@ curl -o hand_landmarker.task https://storage.googleapis.com/mediapipe-models/han
 ## 🔄 Daily Usage
 
 ```bash
-# Terminal 1 - Face Recognition API
-cd video_api
-uvicorn main:app --reload
-
-# Terminal 2 - Mobile Detection
+# Terminal 1 - Detection System
 cd mobile_detection
 python mobile_detection.py
 
-# Terminal 3 - Dashboard
+# Terminal 2 - Dashboard
 cd mobile_detection
 streamlit run dashboard.py
 
-# Terminal 4 - Ngrok (for remote access)
+# Terminal 3 - Face Recognition API
+cd video_api
+uvicorn main:app --reload
+
+# Terminal 4 - Ngrok
 ngrok http 8000
 ```
 
@@ -116,6 +134,8 @@ ngrok http 8000
 |---|---|
 | user_videos | Stores employee videos |
 | mobile_usage | Logs mobile usage sessions |
+| attendance | Check-in/out records |
+| seat_absence | Seat absence logs (15+ min) |
 
 ---
 
@@ -124,13 +144,15 @@ Camera Feed
 ↓
 YOLOv8 detects person + mobile phone
 ↓
-MediaPipe tracks hand position
-↓
-If hand is close to mobile → Timer starts
-↓
 Face recognized → Employee identified
 ↓
-Session saved to PostgreSQL
+Auto Check-in saved to database
+↓
+MediaPipe tracks hand position
+↓
+If hand close to mobile → Timer starts
+↓
+If away from seat 15+ min → Absence logged
 ↓
 Dashboard shows real-time report
 
@@ -138,6 +160,6 @@ Dashboard shows real-time report
 
 ## ⚠️ Important Notes
 - Never share your `.env` file
-- Model files (`.onnx`, `.pt`, `.task`) are downloaded automatically
-- Run `extract_faces.py` whenever new employee data is added
-- Minimum 15 face images recommended per employee for best accuracy
+- Model files are not included — download automatically
+- Run `extract_faces.py` when new employee data is added
+- Minimum 15 face images recommended per employee
