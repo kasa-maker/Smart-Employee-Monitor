@@ -6,6 +6,7 @@ from datetime import datetime
 import os
 import numpy as np
 from db_logger import log_mobile_usage
+from attendance_logger import check_in, check_out, log_seat_absence
 
 # ── Paths ──────────────────────────────────────────────
 KNOWN_FACES_DIR = r"C:\Users\LENOVO\Desktop\VIDEO_API\video_api\known_faces"
@@ -74,6 +75,12 @@ total_usage = 0
 current_user = "Unknown"
 current_id = ""
 
+# Attendance state
+checked_in_users = set()
+checked_out_users = set()
+last_seen = {}
+away_since = {}
+
 def get_box_center(box):
     x1, y1, x2, y2 = box
     return ((x1 + x2) / 2, (y1 + y2) / 2)
@@ -127,6 +134,28 @@ with HandLandmarker.create_from_options(options) as landmarker:
         # ── Har 10 frame pe face recognize karo ──
         if frame_count % 10 == 0:
             current_user, current_id = recognize_face(frame)
+            
+            if current_user != "Unknown" and current_id:
+                now = datetime.now()
+                
+                # Check-in — pehli baar dikh raha hai
+                if current_id not in checked_in_users:
+                    check_in(current_id, current_user)
+                    checked_in_users.add(current_id)
+                
+                # Seat wapas aa gaya
+                if current_id in away_since:
+                    away_from = away_since.pop(current_id)
+                    log_seat_absence(current_id, current_user, away_from, now)
+                
+                last_seen[current_id] = now
+            
+            # 15 min se zyada koi nahi dikh raha
+            for uid in list(last_seen.keys()):
+                if uid not in away_since:
+                    diff = (datetime.now() - last_seen[uid]).total_seconds() / 60
+                    if diff > 15:
+                        away_since[uid] = last_seen[uid]
 
         # ── YOLO detection ──
         results = model(frame, verbose=False)[0]
@@ -200,6 +229,14 @@ with HandLandmarker.create_from_options(options) as landmarker:
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+# Sab ka check-out
+for uid in checked_in_users:
+    if uid not in checked_out_users:
+        name = [k for k, v in zip(known_names, known_ids) if v == uid]
+        if name:
+            check_out(uid, name[0])
+            checked_out_users.add(uid)
 
 cap.release()
 cv2.destroyAllWindows()
