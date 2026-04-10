@@ -1,5 +1,4 @@
-Ab README update karte hain. README.md ka poora content replace karo:
-markdown# 🧠 Smart Employee Monitor
+# 🧠 Smart Employee Monitor
 
 A complete real-time employee monitoring system with face recognition, mobile usage tracking, and attendance management.
 
