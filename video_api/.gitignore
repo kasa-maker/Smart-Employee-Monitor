@@ -1,0 +1,19 @@
+# Environment
+.env
+
+# Virtual env
+myenv/
+
+# DeepFace temp files
+temp_*.jpg
+temp_*.mp4
+
+
+known_faces/
+
+
+__pycache__/
+*.pyc
+
+
+*.h5
