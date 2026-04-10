@@ -1,85 +1,143 @@
-# 🎯 ID and Face Detection System
+# 👁️ Employee Face Recognition & Mobile Detection System
 
-A real-time employee face recognition system built with FastAPI, PostgreSQL, DeepFace, and Streamlit.
+A complete employee monitoring system with face recognition, mobile usage tracking, and attendance management.
 
-## 🚀 Features
-- 📹 Employee video recording via browser camera
-- ☁️ Video storage in Neon Cloud PostgreSQL
-- 🤖 Face extraction using DeepFace (SFace Model)
-- 🎯 Real-time face recognition — live camera + video upload
-- 📊 Annotated output video with Name and ID labels
-- 🌐 Shareable link via Ngrok
+---
+
+## 📁 Project Structure
+VIDEO_API/
+├── video_api/              # Face Recognition & Attendance
+│   ├── main.py             # FastAPI backend
+│   ├── recognize.py        # Live face recognition
+│   ├── extract_faces.py    # Face extraction from DB
+│   ├── streamlit_app.py    # Video upload dashboard
+│   ├── database.py         # DB connection
+│   ├── models.py           # DB models
+│   └── camera.html         # Camera UI
+│
+└── mobile_detection/       # Mobile Usage Tracking
+├── mobile_detection.py # Live mobile detector
+├── db_logger.py        # Database logging
+└── dashboard.py        # Streamlit dashboard
+
+---
+
+## ✅ Features
+
+### 👤 Face Recognition System
+- Upload employee video via browser
+- Automatic face extraction from video
+- Live camera face recognition
+- Employee data stored in PostgreSQL
+
+### 📱 Mobile Detection System
+- Mobile phone detection using YOLOv8
+- Hand tracking using MediaPipe
+- Timer to track mobile usage duration
+- Real-time dashboard with usage reports
+
+---
 
 ## 🛠️ Tech Stack
-- **Backend:** FastAPI, PostgreSQL (Neon Cloud)
-- **AI/ML:** DeepFace (SFace), OpenCV
-- **Frontend:** Streamlit, HTML/JS
-- **Tools:** Ngrok, SQLAlchemy, Python-dotenv
 
-## ⚙️ Setup
+| Category | Technology |
+|---|---|
+| Backend | FastAPI |
+| Database | PostgreSQL (Neon Cloud) |
+| Face Detection | OpenCV YuNet |
+| Face Recognition | SFace Model |
+| Object Detection | YOLOv8 |
+| Hand Tracking | MediaPipe |
+| Frontend | Streamlit, HTML/JS |
+| Tunnel | Ngrok |
 
-### 1. Clone the repository
+---
+
+## ⚙️ Setup & Installation
+
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/kasa-maker/ID-and-Face-Detection-System.git
-cd ID-and-Face-Detection-System
+git clone https://github.com/kasa-maker/Employee-Face-Recognition-Mobile-Detection.git
+cd Employee-Face-Recognition-Mobile-Detection
 ```
 
-### 2. Create virtual environment
+### 2. Environment Variables
 ```bash
+cp .env.example .env
+# Add your Neon Cloud DATABASE_URL in .env file
+```
+
+### 3. Video API Setup
+```bash
+cd video_api
 python -m venv myenv
 myenv\Scripts\activate
 pip install -r requirements.txt
+uvicorn main:app --reload
 ```
 
-### 3. Configure environment
+### 4. Mobile Detection Setup
 ```bash
-cp .env.example .env
-# Add your Neon DB URL inside .env
+cd mobile_detection
+python -m venv venv
+venv\Scripts\activate
+pip install ultralytics mediapipe opencv-python psycopg2-binary streamlit python-dotenv
+
+# Download required models
+curl -o hand_landmarker.task https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
 ```
 
-### 4. Run the project
+---
+
+## 🔄 Daily Usage
+
 ```bash
-# Terminal 1 - API Server
+# Terminal 1 - Face Recognition API
+cd video_api
 uvicorn main:app --reload
 
-# Terminal 2 - Streamlit UI
-streamlit run streamlit_app.py
+# Terminal 2 - Mobile Detection
+cd mobile_detection
+python mobile_detection.py
 
-# Terminal 3 - Ngrok (shareable link)
+# Terminal 3 - Dashboard
+cd mobile_detection
+streamlit run dashboard.py
+
+# Terminal 4 - Ngrok (for remote access)
 ngrok http 8000
 ```
 
-### 5. Extract faces from DB
-```bash
-python extract_faces.py
-```
+---
 
-## 📁 Project Structure
-├── main.py              # FastAPI backend
-├── database.py          # Database connection
-├── models.py            # Database tables
-├── schemas.py           # Pydantic schemas
-├── extract_faces.py     # Extract faces from DB videos
-├── recognize.py         # Live camera recognition
-├── streamlit_app.py     # Video upload & recognition UI
-├── camera.html          # Employee video registration
-└── .env.example         # Environment variables template
-## 🔄 How It Works
-1. Employee records a short video via `camera.html`
-2. Video is stored in Neon Cloud PostgreSQL
-3. `extract_faces.py` extracts face images from stored videos
-4. Upload a group video in Streamlit — system detects and labels all known employees
-5. Download the annotated output video with Name + ID on each face
-### 🎥 Live Camera Detection
-- Real-time face recognition via webcam
-- Detects multiple employees simultaneously in a single frame
-- Known employees highlighted with **Green box + Name + ID**
-- Unknown persons highlighted with **Red box** and automatically rejected
-- Processes every 5th frame for smooth performance — no lag or freezing
-- Powered by DeepFace SFace model with cosine similarity matching
-```bash
-# Run live detection
-python recognize.py
-## 👤 Author
-**Kasaam** — AI Engineering Student 
+## 🗄️ Database Tables
 
+| Table | Purpose |
+|---|---|
+| user_videos | Stores employee videos |
+| mobile_usage | Logs mobile usage sessions |
+
+---
+
+## 📊 How It Works
+Camera Feed
+↓
+YOLOv8 detects person + mobile phone
+↓
+MediaPipe tracks hand position
+↓
+If hand is close to mobile → Timer starts
+↓
+Face recognized → Employee identified
+↓
+Session saved to PostgreSQL
+↓
+Dashboard shows real-time report
+
+---
+
+## ⚠️ Important Notes
+- Never share your `.env` file
+- Model files (`.onnx`, `.pt`, `.task`) are downloaded automatically
+- Run `extract_faces.py` whenever new employee data is added
+- Minimum 15 face images recommended per employee for best accuracy
